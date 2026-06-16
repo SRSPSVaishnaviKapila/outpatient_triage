@@ -2,22 +2,42 @@
 // MAIN.JS - Application entry point
 // ============================================
 
+console.log("✅ main.js loaded");
+
+(function () {
+    if (window.location.pathname.includes("login.html")) return;
+
+    const role = localStorage.getItem("userRole");
+
+    if (!role) {
+        window.location.replace("login.html");
+        return;
+    }
+
+    console.log("✅ User authenticated as:", role);
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("✅ PHC Triage Assistant initializing…");
+    console.log("✅ PHC frontend initializing");
 
-  if (typeof setupNavigation      === "function") { setupNavigation();      console.log("✅ Navigation ready"); }
-  if (typeof setupWelcomeChoices  === "function") { setupWelcomeChoices();  console.log("✅ Welcome choices ready"); }
-  if (typeof renderSymptomPicker  === "function") { renderSymptomPicker();  console.log("✅ Symptom picker ready"); }
-  if (typeof setupVoiceInput      === "function") { setupVoiceInput();      console.log("✅ Voice input ready"); }
-  if (typeof setupTriageForm      === "function") { setupTriageForm();      console.log("✅ Triage form ready"); }
-  if (typeof initializeChatbot    === "function") { initializeChatbot();    console.log("✅ Chatbot ready"); }
-  if (typeof setupLogout          === "function") { setupLogout();          console.log("✅ Logout ready"); }
+    if (typeof setupTriageForm === "function") {
+        setupTriageForm();
+        console.log("✅ Triage form ready");
+    }
 
-  // Apply role access LAST (needs DOM fully ready)
-  if (typeof applyRoleAccess === "function") {
+    if (typeof setupVoiceInput === "function") {
+        setupVoiceInput();
+        console.log("✅ Voice input ready");
+    }
+
+    if (typeof initializeChatbot === "function") {
+        initializeChatbot();
+        console.log("✅ Chatbot ready");
+    }
+
     setTimeout(() => {
-      applyRoleAccess();
-      console.log("✅ Role access applied");
-    }, 50);
-  }
+        if (typeof switchMode === "function") {
+            switchMode(localStorage.getItem("inputMode") || "type");
+        }
+    }, 200);
 });
