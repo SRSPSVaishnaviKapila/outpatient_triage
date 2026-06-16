@@ -1,86 +1,64 @@
-// ============================================
-// NAVIGATION.JS - Role-based navigation
-// ============================================
+window.appState = {
+  currentPage: "welcomePage",
+  currentMode: localStorage.getItem("inputMode") || "type"
+};
+
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active-page");
+    page.style.display = "none";
+  });
+
+  const page = document.getElementById(pageId);
+  if (!page) return;
+
+  page.classList.add("active-page");
+  page.style.display = "block";
+
+  document.querySelectorAll(".nav-link").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.page === pageId);
+  });
+
+  window.appState.currentPage = pageId;
+  sessionStorage.setItem("currentPage", pageId);
+  history.replaceState(null, "", "#" + pageId);
+
+  if (pageId === "triagePage" && typeof switchMode === "function") {
+    setTimeout(() => switchMode(localStorage.getItem("inputMode") || "type"), 100);
+  }
+
+  if (pageId === "inventoryPage" && typeof loadInventory === "function") loadInventory();
+  if (pageId === "doctorsPage" && typeof loadDoctors === "function") loadDoctors();
+  if (pageId === "patientsPage" && typeof loadPatients === "function") loadPatients();
+  if (pageId === "tokensPage" && typeof loadTokens === "function") loadTokens();
+}
 
 function setupNavigation() {
   document.querySelectorAll(".nav-link").forEach(btn => {
-    btn.addEventListener("click", function (e) {
+    btn.onclick = e => {
       e.preventDefault();
-      e.stopPropagation();
-      const pageId = this.dataset.page;
-      window.location.hash = pageId;
-      showPage(pageId);
-    });
+
+      const pageId = btn.dataset.page;
+      if (pageId) showPage(pageId);
+    };
   });
 }
-
-function showPage(pageId) {
-  const targetPage = document.getElementById(pageId);
-  if (!targetPage) {
-    console.warn("⚠️ Page not found:", pageId);
-    return;
-  }
-
-  // Hide all pages
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
-
-  // Show target page
-  targetPage.classList.add("active-page");
-
-  // Update nav active state
-  document.querySelectorAll(".nav-link").forEach(b => b.classList.remove("active"));
-  const activeNav = document.querySelector(`.nav-link[data-page="${pageId}"]`);
-  if (activeNav) activeNav.classList.add("active");
-
-  // Load page-specific data
-  const loaders = {
-    inventoryPage: typeof loadInventory === "function" ? loadInventory : null,
-    doctorsPage:   typeof loadDoctors   === "function" ? loadDoctors   : null,
-    patientsPage:  typeof loadPatients  === "function" ? loadPatients  : null,
-    tokensPage:    typeof loadTokens    === "function" ? loadTokens    : null
-  };
-
-  if (loaders[pageId]) {
-    setTimeout(loaders[pageId], 100);
-  }
-}
-
 function setupWelcomeChoices() {
   document.querySelectorAll(".choice-card").forEach(card => {
-    card.addEventListener("click", function (e) {
+    card.onclick = e => {
       e.preventDefault();
-      e.stopPropagation();
-      currentInputMode = this.dataset.input;
-      updateInputModeUI();
-      window.location.hash = "triagePage";
+
+      const mode = card.dataset.input;
+      localStorage.setItem("inputMode", mode);
+      window.appState.currentMode = mode;
+
       showPage("triagePage");
-    });
+
+      setTimeout(() => {
+        if (typeof switchMode === "function") switchMode(mode);
+      }, 150);
+    };
   });
-}
-
-// Track current input mode globally
-let currentInputMode = "type";
-
-function updateInputModeUI() {
-  const badge = $("inputModeBadge");
-  if (badge) {
-    const labels = { type: "⌨️ Type", visual: "🧩 Visual Picker", voice: "🎙️ Voice" };
-    badge.textContent = `Mode: ${labels[currentInputMode] || "⌨️ Type"}`;
-  }
-
-  const visualDiv = $("visualPicker");
-  const voiceDiv  = $("voiceBox");
-  if (visualDiv) visualDiv.classList.toggle("hidden", currentInputMode !== "visual");
-  if (voiceDiv)  voiceDiv.classList.toggle("hidden",  currentInputMode !== "voice");
-
-  if (currentInputMode === "visual") syncSelectedChipsToTextarea();
-}
-
-function syncSelectedChipsToTextarea() {
-  const selected = [...document.querySelectorAll(".symptom-chip.selected")]
-    .map(c => c.dataset.symptom);
-  const ta = $("symptoms");
-  if (ta) ta.value = selected.join(", ");
 }
 
 function applyRoleAccess() {
@@ -91,48 +69,45 @@ function applyRoleAccess() {
     return;
   }
 
-  // Pages each role may access
   const permissions = {
-    patient:   ["welcomePage", "triagePage", "doctorsPage"],
-    doctor:    ["patientsPage", "tokensPage"],
-    inventory: ["inventoryPage"]
+    patient: ["welcomePage", "triagePage", "doctorsPage", "tokensPage"],
+    doctor: ["triagePage", "patientsPage", "tokensPage"],
+    inventory: ["welcomePage", "inventoryPage"]
   };
 
-  // Default landing page per role
-  const defaultPages = {
-    patient:   "welcomePage",
-    doctor:    "patientsPage",
+  const defaults = {
+    patient: "welcomePage",
+    doctor: "triagePage",
     inventory: "inventoryPage"
   };
 
   const allowed = permissions[role] || [];
 
-  // Show / hide nav buttons
   document.querySelectorAll(".nav-link").forEach(btn => {
     const page = btn.dataset.page;
     btn.style.display = allowed.includes(page) ? "flex" : "none";
   });
 
-  // Determine page to show
-  const hash = window.location.hash.substring(1);
-  const pageToShow = (hash && allowed.includes(hash)) ? hash : defaultPages[role];
-  showPage(pageToShow);
+  const hash = window.location.hash.replace("#", "");
+  showPage(allowed.includes(hash) ? hash : defaults[role]);
 }
 
 function setupLogout() {
   const btn = document.getElementById("logoutBtn");
   if (!btn) return;
 
-  btn.addEventListener("click", function (e) {
-    e.preventDefault();
-    if (!confirm("Are you sure you want to logout?")) return;
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("username");
+  btn.addEventListener("click", () => {
+    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = "login.html";
   });
 }
 
-// Expose globally
-window.applyRoleAccess = applyRoleAccess;
-window.setupLogout     = setupLogout;
-window.showPage        = showPage;
+document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+  setupWelcomeChoices();
+  setupLogout();
+  applyRoleAccess();
+});
+
+window.showPage = showPage;
