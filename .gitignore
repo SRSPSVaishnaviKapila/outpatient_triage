@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+
+# Excel temp files
+~$*.xlsx
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+datasets/triage/disease_symptoms.csv

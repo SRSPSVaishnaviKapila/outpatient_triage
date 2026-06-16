@@ -1,0 +1,20 @@
+Fever is a temporary increase in body temperature, usually caused by infections.
+
+Common symptoms:
+- High body temperature
+- Chills
+- Sweating
+- Weakness
+- Body pain
+
+Possible causes:
+- Viral infections
+- Flu
+- COVID-19
+- Bacterial infections
+
+Seek medical attention if:
+- Fever is above 39°C
+- Fever lasts more than 3 days
+- Difficulty breathing occurs
+- Patient becomes unconscious
