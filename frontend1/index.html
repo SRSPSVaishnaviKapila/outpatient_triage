@@ -68,80 +68,91 @@
     </section>
 
     <!-- TRIAGE PAGE -->
-    <section id="triagePage" class="page">
-      <div class="page-header">
+  <section id="triagePage" class="page">
+    <div class="page-header">
         <div>
-          <h1>🩺 Patient Triage Form</h1>
-          <p>Enter patient details and symptoms for AI-powered assessment <span class="required-note">(<span class="required-star">*</span> Required)</span></p>
+            <h1>🩺 Patient Triage Form</h1>
+            <p>Enter patient details and symptoms for AI-powered assessment</p>
         </div>
-        <span id="inputModeBadge" class="mode-badge">Mode: ⌨️ Type</span>
-      </div>
+        <div class="mode-indicator">
+            <span id="inputModeBadge" class="mode-badge">⌨️ Type Mode</span>
+            <button class="mode-toggle-btn active" data-mode="type">⌨️ Type</button>
+            <button class="mode-toggle-btn" data-mode="visual">🧩 Visual</button>
+            <button class="mode-toggle-btn" data-mode="voice">🎙️ Voice</button>
+        </div>
+    </div>
 
-      <div class="form-card">
+    <div class="form-card">
+        <!-- Form fields -->
         <div class="form-grid">
-          <label class="required-label">
-            <span>👤 Patient Name <span class="required-star">*</span></span>
-            <input type="text" id="patientName" placeholder="e.g., Meena Sharma" />
-          </label>
-          <label class="required-label">
-            <span>🎂 Age (years) <span class="required-star">*</span></span>
-            <input type="number" id="age" placeholder="e.g., 28" min="0" max="120" />
-          </label>
-          <label class="required-label">
-            <span>⚥ Gender <span class="required-star">*</span></span>
-            <select id="gender">
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
-          </label>
-          <label>
-            <span>📅 Duration (days)</span>
-            <input type="number" id="durationDays" placeholder="e.g., 2" min="0" />
-          </label>
+            <label class="required-label">
+                <span>👤 Patient Name <span class="required-star">*</span></span>
+                <input type="text" id="patientName" placeholder="e.g., Meena Sharma" />
+            </label>
+            <label class="required-label">
+                <span>🎂 Age (years) <span class="required-star">*</span></span>
+                <input type="number" id="age" placeholder="e.g., 28" min="0" max="120" />
+            </label>
+            <label class="required-label">
+                <span>⚥ Gender <span class="required-star">*</span></span>
+                <select id="gender">
+                    <option value="">Select Gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                </select>
+            </label>
+            <label>
+                <span>📅 Duration (days)</span>
+                <input type="number" id="durationDays" placeholder="e.g., 2" min="0" />
+            </label>
         </div>
 
         <label class="required-label">
-          <span>🤒 Symptoms <span class="required-star">*</span></span>
-          <small>(comma-separated, or use picker / voice below)</small>
-          <textarea id="symptoms" rows="2" placeholder="e.g., fever, chest pain, shortness of breath"></textarea>
+            <span>🤒 Symptoms <span class="required-star">*</span></span>
+            <small>(comma-separated, or use Visual Picker / Voice below)</small>
+            <textarea id="symptoms" rows="2" placeholder="e.g., fever, chest pain, shortness of breath"></textarea>
         </label>
 
         <!-- Visual Picker -->
         <div id="visualPicker" class="visual-picker hidden">
-          <h3>🧩 Click symptoms to select (multiple allowed)</h3>
-          <div class="symptom-grid" id="symptomGrid"></div>
+            <h4>🧩 Click symptoms to select (multiple allowed)</h4>
+            <div class="symptom-grid" id="symptomGrid"></div>
+            <p style="font-size:13px;color:#64748b;margin-top:10px;">
+                <em>Selected symptoms will appear in the text box above</em>
+            </p>
         </div>
 
         <!-- Voice Box -->
         <div id="voiceBox" class="voice-box hidden">
-          <button type="button" id="startVoice" class="secondary-btn">🎙️ Start Voice Input</button>
-          <p id="voiceStatus" style="margin-top:10px;color:#64748b;font-size:13px;">
-            Click the mic button and speak symptoms clearly (English).
-          </p>
+            <h4>🎙️ Voice Input</h4>
+            <button type="button" id="startVoice" class="secondary-btn" style="padding:12px 24px;">
+                🎤 Start Voice Input
+            </button>
+            <p id="voiceStatus" style="margin-top:10px;color:#64748b;font-size:13px;">
+                Click the button and speak your symptoms clearly in English.
+            </p>
         </div>
 
         <div class="form-grid">
-          <label>
-            <span>📋 Existing Conditions</span>
-            <input type="text" id="existingConditions" placeholder="e.g., Diabetes, Hypertension" />
-          </label>
-          <label>
-            <span>📝 Additional Notes</span>
-            <input type="text" id="additionalNotes" placeholder="e.g., Feeling breathless since morning" />
-          </label>
+            <label>
+                <span>📋 Existing Conditions</span>
+                <input type="text" id="existingConditions" placeholder="e.g., Diabetes, Hypertension" />
+            </label>
+            <label>
+                <span>📝 Additional Notes</span>
+                <input type="text" id="additionalNotes" placeholder="e.g., Feeling breathless since morning" />
+            </label>
         </div>
 
         <button type="button" class="primary-btn" id="generateBtn" style="width:100%;margin-top:8px;">
-          🚀 Generate Triage Report
+            🚀 Generate Triage Report
         </button>
-      </div>
+    </div>
 
-      <div id="loading" class="loading hidden">⏳ Processing triage report… Please wait.</div>
-      <div id="results" class="results hidden"></div>
-    </section>
-
+    <div id="loading" class="loading hidden">⏳ Processing triage report… Please wait.</div>
+    <div id="results" class="results hidden"></div>
+</section>
     <!-- INVENTORY PAGE -->
     <section id="inventoryPage" class="page">
       <div class="page-header">
@@ -224,8 +235,9 @@
   <script src="symptomPicker.js"></script>
   <script src="triage.js"></script>
   <script src="tables.js"></script>
+  <script src="modeSwitcher.js"> </script>
   <script src="chatbot.js"></script>
   <script src="main.js"></script>
-
+  
 </body>
 </html>
