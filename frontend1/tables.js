@@ -2,6 +2,18 @@
 // TABLES.JS - Load backend tables cleanly
 // ============================================
 
+// Make sure helper functions are available
+function $(id) {
+    return document.getElementById(id);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 async function fetchFromBackend(endpoint) {
   try {
     const controller = new AbortController();
@@ -60,7 +72,10 @@ function summaryRow(cells) {
 
 async function loadInventory() {
   const container = $("inventoryTable");
-  if (!container) return;
+  if (!container) {
+    console.warn("⚠️ inventoryTable container not found");
+    return;
+  }
   container.innerHTML = `<div style="text-align:center;padding:40px;">🔄 Loading inventory…</div>`;
 
   const data = await fetchFromBackend("/inventory");
@@ -102,13 +117,17 @@ async function loadInventory() {
     ["💊 Medicine Name", "📦 Quantity", "📊 Status"],
     rows
   );
+  console.log("✅ Inventory table loaded");
 }
 
 // ---- DOCTORS ----
 
 async function loadDoctors() {
   const container = $("doctorsTable");
-  if (!container) return;
+  if (!container) {
+    console.warn("⚠️ doctorsTable container not found");
+    return;
+  }
   container.innerHTML = `<div style="text-align:center;padding:40px;">🔄 Loading doctors…</div>`;
 
   const data = await fetchFromBackend("/doctors");
@@ -150,13 +169,17 @@ async function loadDoctors() {
     ["👨‍⚕️ Doctor Name", "🔬 Specialization", "⏰ Schedule", "📌 Status"],
     rows
   );
+  console.log("✅ Doctors table loaded");
 }
 
 // ---- PATIENTS ----
 
 async function loadPatients() {
   const container = $("patientsTable");
-  if (!container) return;
+  if (!container) {
+    console.warn("⚠️ patientsTable container not found");
+    return;
+  }
   container.innerHTML = `<div style="text-align:center;padding:40px;">🔄 Loading patient records…</div>`;
 
   const data = await fetchFromBackend("/patients");
@@ -218,13 +241,17 @@ async function loadPatients() {
     ["👤 Patient Name", "🩺 Diagnosis", "⚡ Priority", "📅 Date", "📊 Confidence"],
     rows
   );
+  console.log("✅ Patients table loaded");
 }
 
 // ---- TOKENS ----
 
 async function loadTokens() {
   const container = $("tokensTable");
-  if (!container) return;
+  if (!container) {
+    console.warn("⚠️ tokensTable container not found");
+    return;
+  }
   container.innerHTML = `<div style="text-align:center;padding:40px;">🔄 Loading token queue…</div>`;
 
   const data = await fetchFromBackend("/tokens");
@@ -300,4 +327,37 @@ async function loadTokens() {
     ["🎫 Token No.", "👤 Patient", "👨‍⚕️ Doctor", "⚡ Priority", "📌 Status", "⏱️ Est. Wait"],
     rows
   );
+  console.log("✅ Tokens table loaded");
 }
+
+// Load tables when pages are shown
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("📊 Tables.js initialized");
+  
+  // Check if API_URL is defined, if not use default
+  if (typeof API_URL === 'undefined') {
+    window.API_URL = "http://127.0.0.1:8000";
+  }
+  
+  // Load tables if their containers exist
+  setTimeout(() => {
+    if (document.getElementById("inventoryTable")) {
+      loadInventory();
+    }
+    if (document.getElementById("doctorsTable")) {
+      loadDoctors();
+    }
+    if (document.getElementById("patientsTable")) {
+      loadPatients();
+    }
+    if (document.getElementById("tokensTable")) {
+      loadTokens();
+    }
+  }, 500);
+});
+
+// Expose functions globally
+window.loadInventory = loadInventory;
+window.loadDoctors = loadDoctors;
+window.loadPatients = loadPatients;
+window.loadTokens = loadTokens;
