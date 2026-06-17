@@ -864,3 +864,57 @@ tbody tr:last-child td { border-bottom: none; background: #f0faf8; font-weight: 
   .card { min-height: auto; }
   th, td { padding: 10px 10px; font-size: 12px; }
 }
+#symptomGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 15px;
+}
+
+.symptom-chip {
+  min-height: 170px;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 18px;
+  background: #ffffff;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  gap: 6px;
+
+  transition: all 0.25s ease;
+}
+
+.symptom-chip:hover {
+  transform: translateY(-4px);
+  border-color: #14b8a6;
+  box-shadow: 0 10px 22px rgba(15,118,110,0.14);
+}
+
+.symptom-chip.selected {
+  border-color: #0f766e;
+  background: linear-gradient(135deg,#ecfdf5,#ccfbf1);
+}
+
+.symptom-icon {
+  font-size: 52px !important;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.symptom-te {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.symptom-en {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
