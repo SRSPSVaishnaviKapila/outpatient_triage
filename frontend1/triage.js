@@ -24,7 +24,73 @@ function splitCSV(str) {
 function priorityClass(priority) {
     return `priority-${String(priority || "low").toLowerCase()}`;
 }
+const SYMPTOM_GUIDANCE = {
+  "fever": "Drink plenty of water, take rest, monitor temperature, and visit PHC if fever persists more than 2 days.",
+  "cough": "Drink warm fluids and avoid dust or smoke. Seek medical care if cough lasts more than one week.",
+  "cold": "Rest, drink fluids, and avoid cold foods. Visit PHC if symptoms worsen.",
+  "headache": "Rest in a quiet room and stay hydrated. Seek care if severe or associated with weakness.",
+  "migraine": "Avoid bright lights and loud sounds. Take prescribed medication if available.",
+  "dizziness": "Sit down immediately and drink water. Seek help if recurrent.",
+  "chest pain": "Chest pain may be serious. Seek immediate medical attention.",
+  "shortness of breath": "Difficulty breathing requires urgent medical evaluation.",
+  "abdominal pain": "Avoid heavy meals. Seek care if pain is severe or persistent.",
+  "vomiting": "Take ORS and small sips of water. Seek care if persistent.",
+  "diarrhea": "Use ORS frequently and avoid oily foods.",
+  "constipation": "Increase water, fruits, and fiber intake.",
+  "dehydration": "Drink ORS and fluids immediately.",
+  "seizure": "Keep patient safe and seek emergency care.",
+  "unconsciousness": "Emergency condition. Seek immediate medical attention.",
+  "bleeding": "Apply pressure and seek urgent care.",
+  "burns": "Cool with running water for 20 minutes. Avoid applying creams or toothpaste.",
+  "rash": "Avoid scratching and monitor spread.",
+  "allergy": "Avoid allergen exposure and seek care if breathing issues occur.",
+  "burning urination": "Drink water and get urine tested.",
+  "diabetes": "Monitor sugar levels and stay hydrated.",
+  "high blood pressure": "Monitor BP and consult a doctor.",
+  "heart": "Seek immediate medical attention for chest pain or palpitations.",
+  "stroke": "Call emergency services immediately.",
+  "anxiety": "Practice deep breathing and relaxation.",
+  "depression": "Seek support from family and healthcare professionals.",
+  "insomnia": "Maintain sleep hygiene and avoid caffeine at night.",
+  "pregnancy": "Visit PHC for pregnancy-related symptoms.",
+  "child": "Monitor feeding, urine output, and activity level.",
+  "ear pain": "Avoid inserting objects into the ear.",
+  "sore throat": "Drink warm fluids and avoid irritants.",
+  "tooth pain": "Maintain oral hygiene and visit dentist.",
+  "eye pain": "Avoid rubbing eyes and seek care if pain persists.",
+  "swelling": "Elevate affected area and monitor.",
+  "weakness": "Rest and maintain hydration.",
+  "fatigue": "Ensure adequate nutrition and sleep.",
+  "fracture": "Immobilize affected area and seek care.",
+  "snake bite": "Keep patient calm and seek emergency care immediately.",
+  "dog bite": "Wash wound and seek rabies evaluation.",
+  "poisoning": "Seek emergency help immediately.",
+  "jaundice": "Visit PHC for liver evaluation.",
+  "malaria": "Get tested immediately and avoid mosquito exposure.",
+  "dengue": "Drink fluids and seek medical evaluation.",
+  "tuberculosis": "Seek medical testing and wear a mask.",
+  "covid": "Isolate and seek testing if symptoms persist."
+};
+function getSymptomBasedGuidance(symptoms) {
+    const symptomText = (symptoms || []).join(" ").toLowerCase();
+    const matchedGuidance = [];
 
+    Object.keys(SYMPTOM_GUIDANCE).forEach(key => {
+        if (symptomText.includes(key)) {
+            matchedGuidance.push(
+                `<p><b>🩺 ${key.toUpperCase()}:</b> ${SYMPTOM_GUIDANCE[key]}</p>`
+            );
+        }
+    });
+
+    if (matchedGuidance.length > 0) {
+        return matchedGuidance.join("");
+    }
+
+    return `
+        <p><b>🩺 General Advice:</b> Monitor symptoms, drink water, take rest, and visit the PHC if symptoms worsen or continue for more than 2 days.</p>
+    `;
+}
 function formatGuidance(guidance) {
     if (!guidance) return "<p>General medical guidance: Monitor symptoms, stay hydrated, take adequate rest.</p>";
     if (typeof guidance === "string") return `<p>${guidance.replace(/\n/g, "<br>")}</p>`;
@@ -35,6 +101,7 @@ function formatGuidance(guidance) {
         <p><b>🚑 When to seek help:</b> ${escapeHtml(guidance.when_to_seek_medical_attention || guidance.doctor_advice || "Seek immediate medical attention if symptoms worsen")}</p>
     `;
 }
+
 
 function buildSummary(req, data) {
     const existing = req.existing_conditions?.length ? req.existing_conditions.join(", ") : "None";
@@ -232,7 +299,23 @@ function renderPatientTokenOnly(data, req) {
                     <p><b>🏥 Department:</b> ${escapeHtml(dept)}</p>
                 </div>
 
-                <div class="actions" style="justify-content:center;margin-top:20px; display:flex; gap:12px;">
+                <div class="card" style="margin-top:20px;text-align:left;background:#ffffff;border-radius:16px;padding:20px;border:1px solid #dbeeea;">
+                    <h3 style="color:#0f766e;margin-bottom:10px;">📚 Medical Guidance</h3>
+
+                    <button
+                        class="secondary-btn"
+                        id="guidanceToggleBtnPatient"
+                        type="button"
+                        style="margin-top:10px;padding:10px 18px;background:#e6fffb;color:#0f766e;border:none;border-radius:8px;cursor:pointer;font-weight:700;">
+                        👁️ View Medical Guidance
+                    </button>
+
+                    <div id="guidanceContentPatient" style="display:none;margin-top:15px;color:#334155;line-height:1.6;">
+                        ${formatGuidance(data.guidance)}
+                    </div>
+                </div>
+
+                <div class="actions" style="justify-content:center;margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
                     <button class="primary-btn" id="downloadReportBtnPatient" style="background:#0f766e; color:white; border:none; padding:12px 24px; border-radius:8px; cursor:pointer;" type="button">⬇️ Download Report</button>
                     <button class="secondary-btn" id="printReportBtnPatient" style="background:#e6fffb; color:#0f766e; border:none; padding:12px 24px; border-radius:8px; cursor:pointer;" type="button">🖨️ Print Report</button>
                 </div>
@@ -250,8 +333,24 @@ function renderPatientTokenOnly(data, req) {
     setTimeout(() => {
         const dlBtn = document.getElementById("downloadReportBtnPatient");
         const prBtn = document.getElementById("printReportBtnPatient");
+        const guideBtn = document.getElementById("guidanceToggleBtnPatient");
+
         if (dlBtn) dlBtn.addEventListener("click", downloadReport);
         if (prBtn) prBtn.addEventListener("click", printReport);
+
+        if (guideBtn) {
+            guideBtn.addEventListener("click", function () {
+                const content = document.getElementById("guidanceContentPatient");
+                if (!content) return;
+
+                const hidden = content.style.display === "none" || !content.style.display;
+                content.style.display = hidden ? "block" : "none";
+
+                this.textContent = hidden
+                    ? "🙈 Hide Medical Guidance"
+                    : "👁️ View Medical Guidance";
+            });
+        }
     }, 100);
 
     resultsDiv.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -289,6 +388,7 @@ function downloadReport() {
         `Token #    : ${res.token_number ?? "—"}`,
         `Queue Pos  : ${res.queue_position ?? "—"}`,
         `Wait Time  : ${res.estimated_wait_time || "—"}`,
+        `Guidance   : ${typeof res.guidance === "string" ? res.guidance : JSON.stringify(res.guidance || "General guidance")}`,
         "",
         "MEDICINES",
         "-".repeat(30),
@@ -524,7 +624,7 @@ async function processTriage() {
         const finalData = {
             priority,
             recommendation: raw.recommendation || "Consult doctor",
-            guidance: raw.guidance || null,
+            guidance: getSymptomBasedGuidance(symptomList),
             matched_symptoms: raw.matched_symptoms || symptomList,
             predicted_disease: raw.predicted_disease || "Under Evaluation",
             confidence_score: raw.confidence_score ?? null,
